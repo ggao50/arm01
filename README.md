@@ -194,7 +194,7 @@ ros2 run wisco_ethercat_ros2_hw arm export lerobot out_dir ~/arm_logs/A.mcap ~/a
 | 1 Bring up | `arm bringup` | joint config `direction` (with `--write-config`) |
 | 1 Indicator | `arm indicator` | nothing (report: 90° step vs protractor, torque sign, 0x6077 units, nulls) |
 | 2 Zero | `arm zero` | `zero_offsets_rad` |
-| 3 Limits | `arm limits` | `soft_limits_rad` |
+| 3 Limits | `arm limits` | `soft_limits_rad` (3° inside each stop; the URDF range for a `hard_stops: false` joint) |
 | 4 Torque constant | `arm kt` | `kt_output_nm_per_a` |
 | 5 Gravity comp | `arm gravity` | `link_inertials` |
 | 6 Friction | `arm friction` | `friction` |
@@ -365,7 +365,9 @@ Assumptions that need the bench (also in the URDF ledger):
   is level with the base plate.
 - Ranges are the export's operating ROM (J1 −90..+180, J2 0..190, J3 ±90, J4 0..130,
   J5 ±90, J6 ±35, J7 ±90°), not certified stops: J1's stops are unverified, J2's contact
-  onset is at −0.1° and J6's at ±35.1°. `arm limits` finds the real stops.
+  onset is at −0.1° and J6's at ±35.1°. `arm limits` finds the real stops,
+  except on J1: CAD found no J1 stop, so `hard_stops: false` in `arm01.yaml` keeps −90..+180°
+  as its soft limits and `arm limits` never drives it past them (only the cables would stop it).
 - The wrist is a near-parallelogram (output/crank 0.996..1.004): the J6 encoder drives
   `wrist_pitch` (the output pivot) 1:1, within 0.25° over ±35°; the crank and coupler are
   mimic joints. The export's `model.py` has the exact loop.
